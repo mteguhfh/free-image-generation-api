@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free AI Image Generator</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Arial}
+body{
+background:#0f172a;
+color:#fff;
+display:flex;
+flex-direction:column;
+height:100vh;
+}
+
+header{
+padding:14px;
+text-align:center;
+font-weight:600;
+background:#111827;
+border-bottom:1px solid #1f2937;
+}
+
+#gallery{
+flex:1;
+overflow-y:auto;
+padding:20px;
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+gap:16px;
+}
+
+.card{
+background:#111827;
+border-radius:10px;
+overflow:hidden;
+border:1px solid #1f2937;
+}
+
+.card img{
+width:100%;
+display:block;
+}
+
+.card p{
+font-size:13px;
+padding:8px;
+opacity:.8;
+}
+
+.card a{
+display:block;
+padding:6px 10px;
+font-size:12px;
+text-align:center;
+background:#1f2937;
+color:#fff;
+text-decoration:none;
+}
+
+#controls{
+padding:12px;
+background:#111827;
+border-top:1px solid #1f2937;
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+}
+
+input,button{
+padding:10px;
+border:none;
+border-radius:6px;
+}
+
+#prompt{
+flex:1;
+min-width:160px;
+}
+
+#apikey{
+width:140px;
+}
+
+button{
+background:#6366f1;
+color:white;
+cursor:pointer;
+}
+
+button:hover{
+background:#4f46e5;
+}
+
+.loader{
+grid-column:1/-1;
+text-align:center;
+opacity:.7;
+}
+</style>
+
+</head>
+
+<body>
+
+<header>✨ Free AI Image Generator</header>
+
+<div id="gallery"></div>
+
+<div id="controls">
+<input id="apikey" placeholder="API Key">
+<input id="prompt" placeholder="Describe the image you want...">
+<button onclick="generate()">Generate</button>
+</div>
+
+<script>
+
+const API_URL="YOUR_WORKER_URL";
+
+async function generate(){
+const prompt=document.getElementById("prompt").value.trim();
+const key=document.getElementById("apikey").value.trim();
+const gallery=document.getElementById("gallery");
+
+if(!prompt||!key)return alert("Enter prompt and API key");
+
+const loader=document.createElement("div");
+loader.className="loader";
+loader.innerText="Generating image...";
+gallery.prepend(loader);
+
+try{
+
+const res=await fetch(API_URL,{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+key
+},
+body:JSON.stringify({prompt})
+});
+
+if(!res.ok) throw new Error("API Error");
+
+const blob=await res.blob();
+const url=URL.createObjectURL(blob);
+
+const card=document.createElement("div");
+card.className="card";
+
+card.innerHTML=`
+<img src="${url}">
+<p>${prompt}</p>
+<a href="${url}" download="ai-image.jpg">Download</a>
+`;
+
+gallery.prepend(card);
+
+}catch(err){
+alert(err.message);
+}
+
+loader.remove();
+document.getElementById("prompt").value="";
+
+}
+
+</script>
+
+</body>
+</html>

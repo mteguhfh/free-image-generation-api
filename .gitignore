@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Wrangler
+.wrangler/
+.dev.vars
+
+# Environment
+.env
+.env.*
+
+# Logs and OS noise
+*.log
+.DS_Store

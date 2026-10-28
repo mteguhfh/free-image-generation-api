@@ -1,0 +1,19 @@
+name = "free-image-generation-api"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+# Workers AI binding. Required.
+[ai]
+binding = "AI"
+
+# Optional: restrict which browser origins may call the API.
+# Defaults to "*" when unset. Comma-separate multiple origins.
+# [vars]
+# ALLOWED_ORIGINS = "https://example.com,http://localhost:5173"
+
+# Set DEBUG in the dashboard or with `wrangler secret put DEBUG` only while
+# diagnosing problems; it adds upstream error text to responses.
+# DEBUG = "true"
+
+[observability]
+enabled = true

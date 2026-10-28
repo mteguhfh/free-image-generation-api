@@ -1,0 +1,18 @@
+{
+  "name": "free-image-generation-api",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Key-protected AI image generation API on Cloudflare Workers",
+  "type": "module",
+  "main": "worker.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail",
+    "check": "node --check worker.js"
+  },
+  "devDependencies": {
+    "wrangler": "^4.154.0"
+  }
+}

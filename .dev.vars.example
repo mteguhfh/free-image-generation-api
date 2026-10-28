@@ -1,0 +1,7 @@
+# Local development secrets for `wrangler dev`.
+# Copy to .dev.vars (git-ignored) and replace the value.
+API_KEY=change-me-to-a-long-random-string
+
+# Optional
+# ALLOWED_ORIGINS=http://localhost:5173
+# DEBUG=true

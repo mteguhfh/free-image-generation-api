@@ -1,173 +1,430 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Free AI Image Generator</title>
-
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Arial}
-body{
-background:#0f172a;
-color:#fff;
-display:flex;
-flex-direction:column;
-height:100vh;
-}
+  :root {
+    color-scheme: dark;
+    --bg: #0b0f14;
+    --panel: #121821;
+    --panel-2: #182230;
+    --line: #24303f;
+    --text: #e8edf4;
+    --muted: #94a3b8;
+    --accent: #6ea8fe;
+    --accent-ink: #08121f;
+    --danger: #ff8a8a;
+    --radius: 10px;
+  }
 
-header{
-padding:14px;
-text-align:center;
-font-weight:600;
-background:#111827;
-border-bottom:1px solid #1f2937;
-}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-#gallery{
-flex:1;
-overflow-y:auto;
-padding:20px;
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-gap:16px;
-}
+  body {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
 
-.card{
-background:#111827;
-border-radius:10px;
-overflow:hidden;
-border:1px solid #1f2937;
-}
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 14px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+  }
 
-.card img{
-width:100%;
-display:block;
-}
+  header h1 { font-size: 17px; font-weight: 650; letter-spacing: -0.01em; }
+  header p { font-size: 13px; color: var(--muted); }
 
-.card p{
-font-size:13px;
-padding:8px;
-opacity:.8;
-}
+  main {
+    padding: 20px;
+    overflow-y: auto;
+  }
 
-.card a{
-display:block;
-padding:6px 10px;
-font-size:12px;
-text-align:center;
-background:#1f2937;
-color:#fff;
-text-decoration:none;
-}
+  #gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
 
-#controls{
-padding:12px;
-background:#111827;
-border-top:1px solid #1f2937;
-display:flex;
-flex-wrap:wrap;
-gap:8px;
-}
+  .empty {
+    grid-column: 1 / -1;
+    color: var(--muted);
+    font-size: 14px;
+    padding: 48px 0;
+    text-align: center;
+  }
 
-input,button{
-padding:10px;
-border:none;
-border-radius:6px;
-}
+  .card {
+    display: flex;
+    flex-direction: column;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
 
-#prompt{
-flex:1;
-min-width:160px;
-}
+  .card .frame {
+    aspect-ratio: 1;
+    background: var(--panel-2);
+    display: grid;
+    place-items: center;
+  }
 
-#apikey{
-width:140px;
-}
+  .card img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-button{
-background:#6366f1;
-color:white;
-cursor:pointer;
-}
+  .card .body { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
 
-button:hover{
-background:#4f46e5;
-}
+  .card .prompt {
+    font-size: 13px;
+    color: var(--text);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 
-.loader{
-grid-column:1/-1;
-text-align:center;
-opacity:.7;
-}
+  .card .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .card .actions { display: flex; gap: 8px; }
+
+  .card a.download {
+    flex: 1;
+    text-align: center;
+    padding: 7px 10px;
+    border-radius: 7px;
+    border: 1px solid var(--line);
+    background: var(--panel-2);
+    color: var(--text);
+    font-size: 12px;
+    text-decoration: none;
+  }
+
+  .card a.download:hover { border-color: var(--accent); color: var(--accent); }
+
+  .skeleton {
+    aspect-ratio: 1;
+    background: linear-gradient(100deg, var(--panel-2) 30%, #1f2b3a 50%, var(--panel-2) 70%);
+    background-size: 200% 100%;
+    animation: shimmer 1.3s linear infinite;
+  }
+
+  @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+  @media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 14px 20px 18px;
+    display: grid;
+    gap: 10px;
+  }
+
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .row.split { justify-content: space-between; }
+
+  label {
+    font-size: 12px;
+    color: var(--muted);
+    display: grid;
+    gap: 4px;
+    flex: 1 1 200px;
+  }
+
+  input, textarea, select, button {
+    font: inherit;
+    color: var(--text);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 11px;
+  }
+
+  textarea { resize: vertical; min-height: 44px; max-height: 160px; }
+
+  input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  #generate {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 650;
+    padding: 10px 22px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  #generate:disabled { opacity: 0.55; cursor: progress; }
+
+  #status { font-size: 12px; color: var(--muted); min-height: 16px; }
+  #status.error { color: var(--danger); }
+
+  .hint { font-size: 11px; color: var(--muted); }
+  kbd {
+    font: inherit;
+    font-size: 10px;
+    padding: 1px 5px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--panel-2);
+  }
 </style>
-
 </head>
-
 <body>
 
-<header>✨ Free AI Image Generator</header>
+<header>
+  <h1>Free AI Image Generator</h1>
+  <p>Powered by a Cloudflare Worker running Workers AI</p>
+</header>
 
-<div id="gallery"></div>
+<main>
+  <div id="gallery">
+    <p class="empty">Generated images appear here.</p>
+  </div>
+</main>
 
-<div id="controls">
-<input id="apikey" placeholder="API Key">
-<input id="prompt" placeholder="Describe the image you want...">
-<button onclick="generate()">Generate</button>
-</div>
+<footer>
+  <div class="row">
+    <label>
+      Worker URL
+      <input id="apiUrl" type="url" placeholder="https://your-worker.workers.dev" autocomplete="off" spellcheck="false">
+    </label>
+    <label>
+      API key
+      <input id="apiKey" type="password" placeholder="Bearer token" autocomplete="off">
+    </label>
+    <label>
+      Model
+      <select id="model">
+        <option value="flux-1-schnell">FLUX.1 schnell</option>
+        <option value="sdxl">Stable Diffusion XL</option>
+        <option value="sdxl-lightning">SDXL Lightning</option>
+        <option value="dreamshaper-8-lcm">Dreamshaper 8 LCM</option>
+        <option value="lucid-origin">Lucid Origin (paid)</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="row">
+    <label style="flex: 1 1 100%;">
+      Prompt
+      <textarea id="prompt" rows="2" placeholder="A lighthouse at dusk, long exposure, cold blue light"></textarea>
+    </label>
+  </div>
+
+  <div class="row split">
+    <span class="hint">Press <kbd>Ctrl</kbd> + <kbd>Enter</kbd> to generate. Settings are saved in this browser.</span>
+    <button id="generate" type="button">Generate</button>
+  </div>
+
+  <p id="status" role="status" aria-live="polite"></p>
+</footer>
 
 <script>
+  const $ = (id) => document.getElementById(id);
+  const gallery = $("gallery");
+  const status = $("status");
+  const button = $("generate");
 
-const API_URL="YOUR_WORKER_URL";
+  const fields = {
+    apiUrl: $("apiUrl"),
+    apiKey: $("apiKey"),
+    model: $("model"),
+    prompt: $("prompt"),
+  };
 
-async function generate(){
-const prompt=document.getElementById("prompt").value.trim();
-const key=document.getElementById("apikey").value.trim();
-const gallery=document.getElementById("gallery");
+  const STORAGE_KEY = "fia:settings";
+  const MAX_CARDS = 24;
 
-if(!prompt||!key)return alert("Enter prompt and API key");
+  function defaultApiUrl() {
+    const fromQuery = new URLSearchParams(location.search).get("api");
+    if (fromQuery) return fromQuery;
+    if (location.protocol === "http:" || location.protocol === "https:") return location.origin;
+    return "";
+  }
 
-const loader=document.createElement("div");
-loader.className="loader";
-loader.innerText="Generating image...";
-gallery.prepend(loader);
+  function loadSettings() {
+    fields.apiUrl.value = defaultApiUrl();
+    fields.model.value = "flux-1-schnell";
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      if (saved.apiUrl) fields.apiUrl.value = saved.apiUrl;
+      if (saved.apiKey) fields.apiKey.value = saved.apiKey;
+      if (saved.model) fields.model.value = saved.model;
+    } catch {
+      /* corrupt storage: ignore */
+    }
+  }
 
-try{
+  function saveSettings() {
+    try {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          apiUrl: fields.apiUrl.value.trim(),
+          apiKey: fields.apiKey.value,
+          model: fields.model.value,
+        })
+      );
+    } catch {
+      /* storage disabled: settings simply won't persist */
+    }
+  }
 
-const res=await fetch(API_URL,{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+key
-},
-body:JSON.stringify({prompt})
-});
+  for (const field of Object.values(fields)) field.addEventListener("change", saveSettings);
 
-if(!res.ok) throw new Error("API Error");
+  function setStatus(message, isError = false) {
+    status.textContent = message;
+    status.classList.toggle("error", isError);
+  }
 
-const blob=await res.blob();
-const url=URL.createObjectURL(blob);
+  async function readError(res) {
+    const text = await res.text().catch(() => "");
+    try {
+      const data = JSON.parse(text);
+      if (data.error) return data.hint ? data.error + " — " + data.hint : data.error;
+    } catch {
+      /* not json */
+    }
+    return text.slice(0, 200) || "HTTP " + res.status;
+  }
 
-const card=document.createElement("div");
-card.className="card";
+  function addCard(blob, meta) {
+    gallery.querySelector(".empty")?.remove();
 
-card.innerHTML=`
-<img src="${url}">
-<p>${prompt}</p>
-<a href="${url}" download="ai-image.jpg">Download</a>
-`;
+    const card = document.createElement("article");
+    card.className = "card";
 
-gallery.prepend(card);
+    const frame = document.createElement("div");
+    frame.className = "frame";
 
-}catch(err){
-alert(err.message);
-}
+    const img = document.createElement("img");
+    img.alt = meta.prompt;
+    const objectUrl = URL.createObjectURL(blob);
+    img.src = objectUrl;
+    frame.append(img);
 
-loader.remove();
-document.getElementById("prompt").value="";
+    const body = document.createElement("div");
+    body.className = "body";
 
-}
+    const prompt = document.createElement("p");
+    prompt.className = "prompt";
+    prompt.textContent = meta.prompt;
 
+    const metaRow = document.createElement("div");
+    metaRow.className = "meta";
+    const kb = (blob.size / 1024).toFixed(0) + " KB";
+    metaRow.textContent = [meta.model, meta.elapsed + " ms", kb].join(" · ");
+
+    const actions = document.createElement("div");
+    actions.className = "actions";
+
+    const download = document.createElement("a");
+    download.className = "download";
+    download.href = objectUrl;
+    download.download = "ai-" + Date.now() + "." + (meta.mime === "image/jpeg" ? "jpg" : "png");
+    download.textContent = "Download";
+    actions.append(download);
+
+    body.append(prompt, metaRow, actions);
+    card.append(frame, body);
+    gallery.prepend(card);
+
+    while (gallery.children.length > MAX_CARDS) {
+      const last = gallery.lastElementChild;
+      const stale = last.querySelector("img")?.src;
+      if (stale?.startsWith("blob:")) URL.revokeObjectURL(stale);
+      last.remove();
+    }
+  }
+
+  function addSkeleton() {
+    const card = document.createElement("article");
+    card.className = "card";
+    card.dataset.pending = "true";
+    card.innerHTML = '<div class="skeleton"></div>';
+    gallery.prepend(card);
+    return card;
+  }
+
+  async function generate() {
+    const apiUrl = fields.apiUrl.value.trim().replace(/\/+$/, "");
+    const apiKey = fields.apiKey.value.trim();
+    const prompt = fields.prompt.value.trim();
+    const model = fields.model.value;
+
+    if (!apiUrl) return setStatus("Set your Worker URL first.", true);
+    if (!apiKey) return setStatus("Set your API key first.", true);
+    if (!prompt) return setStatus("Describe what you want to generate.", true);
+
+    saveSettings();
+    button.disabled = true;
+    setStatus("Generating with " + model + "…");
+
+    const skeleton = addSkeleton(prompt);
+    const started = performance.now();
+
+    try {
+      const res = await fetch(apiUrl + "/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + apiKey },
+        body: JSON.stringify({ prompt, model }),
+      });
+
+      if (!res.ok) throw new Error(await readError(res));
+
+      const blob = await res.blob();
+      if (!blob.size) throw new Error("The worker returned an empty image.");
+
+      skeleton.remove();
+      addCard(blob, {
+        prompt,
+        model: res.headers.get("X-Model") || model,
+        mime: res.headers.get("Content-Type") || blob.type,
+        elapsed: Math.round(performance.now() - started),
+      });
+
+      setStatus("Done in " + Math.round(performance.now() - started) + " ms.");
+      fields.prompt.value = "";
+    } catch (err) {
+      skeleton.remove();
+      const message = String(err.message || err);
+      setStatus(
+        /Failed to fetch/i.test(message)
+          ? "Could not reach the worker. Check the URL and that ALLOWED_ORIGINS includes " + location.origin
+          : message,
+        true
+      );
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  button.addEventListener("click", generate);
+  fields.prompt.addEventListener("keydown", (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+      event.preventDefault();
+      generate();
+    }
+  });
+
+  loadSettings();
 </script>
 
 </body>

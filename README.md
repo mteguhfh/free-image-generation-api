@@ -93,12 +93,15 @@ Unknown fields are ignored rather than forwarded, so a typo cannot reach the mod
 | Key | Model ID | Output | Free tier |
 | --- | --- | --- | --- |
 | `flux-1-schnell` *(default)* | `@cf/black-forest-labs/flux-1-schnell` | JPEG | yes, fastest and cheapest |
-| `sdxl` | `@cf/stabilityai/stable-diffusion-xl-base-1.0` | PNG | listed at $0.00/step |
-| `sdxl-lightning` | `@cf/bytedance/stable-diffusion-xl-lightning` | PNG | listed at $0.00/step |
-| `dreamshaper-8-lcm` | `@cf/lykon/dreamshaper-8-lcm` | PNG | listed at $0.00/step |
+| `sdxl` | `@cf/leonardo/phoenix-1.0` | PNG | **no**, partner model |
+| `sdxl-lightning` | `@cf/black-forest-labs/flux-1-schnell` | JPEG | yes, fastest and cheapest |
+| `dreamshaper-8-lcm` | `@cf/leonardo/lucid-origin` | JPEG | **no**, partner model |
 | `lucid-origin` | `@cf/leonardo/lucid-origin` | JPEG | **no**, partner model, ~636 Neurons per 512×512 tile |
+| `phoenix-1.0` | `@cf/leonardo/phoenix-1.0` | PNG | **no**, partner model, ~530 Neurons per 512×512 tile |
 
-Aliases: `flux`, `schnell`, `sd-xl`, `stable-diffusion-xl`, `lightning`, `dreamshaper`, `leonardo`, `lucid`.
+Aliases: `flux`, `schnell`, `sd-xl`, `stable-diffusion-xl`, `lightning`, `dreamshaper`, `leonardo`, `lucid`, `phoenix`.
+
+Cloudflare retired the original SDXL, SDXL Lightning, and Dreamshaper model IDs on 20 Nov 2026. The `sdxl`, `sdxl-lightning`, and `dreamshaper-8-lcm` keys are unchanged and now point at Phoenix 1.0, FLUX.1 schnell, and Lucid Origin, so existing integrations keep working.
 
 `flux-2-dev` and `flux-2-klein-*` are intentionally absent: they take `multipart` input with reference images, so they do not fit a JSON prompt-only API.
 
